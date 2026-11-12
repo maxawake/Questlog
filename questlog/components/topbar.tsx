@@ -1,10 +1,11 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors } from '@/constants/theme';
 import { useQuestlog } from '@/lib/questlog-store';
+import { useTheme } from '@/lib/theme-store';
 import { Icon } from './icon';
+import { createStyles } from './topbar.styles';
 
 interface Props {
   onOpenMenu: () => void;
@@ -15,6 +16,8 @@ interface Props {
 export function Topbar({ onOpenMenu, onRefresh, onSettings }: Props) {
   const insets = useSafeAreaInsets();
   const { currentJournal, busy } = useQuestlog();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const journal = currentJournal();
 
   return (
@@ -38,28 +41,3 @@ export function Topbar({ onOpenMenu, onRefresh, onSettings }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  bar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 14,
-    gap: 14,
-    backgroundColor: colors.topbarBg,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.line,
-  },
-  breadcrumb: { flex: 1 },
-  breadcrumbText: { fontSize: 16, color: colors.breadcrumbActive, fontWeight: '600' },
-  actions: { flexDirection: 'row', gap: 9 },
-  roundButton: {
-    width: 29,
-    height: 29,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: colors.roundButtonBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

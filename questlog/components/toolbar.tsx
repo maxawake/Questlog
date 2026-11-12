@@ -1,10 +1,11 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
-import { colors } from '@/constants/theme';
 import { useQuestlog } from '@/lib/questlog-store';
+import { useTheme } from '@/lib/theme-store';
 import type { Filter } from '@/lib/types';
 import { Icon } from './icon';
+import { createStyles } from './toolbar.styles';
 
 const TABS: { key: Filter; title: string }[] = [
   { key: 'all', title: 'All quests' },
@@ -15,6 +16,8 @@ const TABS: { key: Filter; title: string }[] = [
 
 export function Toolbar({ allCount }: { allCount: number }) {
   const { filter, setFilter, search, setSearch } = useQuestlog();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.wrap}>
       <View style={styles.tabs}>
@@ -43,24 +46,3 @@ export function Toolbar({ allCount }: { allCount: number }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: { borderBottomWidth: 1, borderColor: colors.line, paddingBottom: 4 },
-  tabs: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
-  tab: { paddingBottom: 14, position: 'relative', flexDirection: 'row', alignItems: 'center', gap: 4 },
-  tabText: { fontSize: 14, color: colors.tab },
-  tabTextActive: { color: colors.tabActive, fontWeight: '600' },
-  tabCount: { backgroundColor: colors.tabCountBg, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2 },
-  tabCountText: { fontSize: 12, color: colors.tabCountText },
-  tabIndicator: { position: 'absolute', bottom: -1, left: 0, right: 0, height: 2, backgroundColor: '#50674a' },
-  search: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#e4e6da',
-    paddingVertical: 12,
-    marginTop: 4,
-  },
-  searchInput: { flex: 1, fontSize: 15, color: '#4b5c46', padding: 0 },
-});

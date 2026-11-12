@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Text, View } from 'react-native';
 
-import { colors } from '@/constants/theme';
 import { useQuestlog } from '@/lib/questlog-store';
+import { useTheme } from '@/lib/theme-store';
 import { Icon } from '../icon';
-import { DialogActions, ErrorText, FieldLabel, PrimaryButton, SecondaryButton, TextField } from './form-parts';
 import { ModalShell } from '../modal-shell';
+import { createStyles } from './connection-dialog.styles';
+import { DialogActions, ErrorText, FieldLabel, PrimaryButton, SecondaryButton, TextField } from './form-parts';
 
 export function ConnectionDialog({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { mode, account, serverUrl, checkServer, login, logout } = useQuestlog();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   // The parent gives this component a fresh `key` each time it is opened, so
   // this only needs to be initialized once per mount (no reset effect needed).
   const [step, setStep] = useState<'server' | 'login'>('server');
@@ -122,18 +125,3 @@ export function ConnectionDialog({ visible, onClose }: { visible: boolean; onClo
     </ModalShell>
   );
 }
-
-const styles = StyleSheet.create({
-  intro: { fontSize: 16, lineHeight: 23, color: colors.dialogBodyText },
-  card: {
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.connectionCardBorder,
-    borderRadius: 7,
-    backgroundColor: colors.connectionCardBg,
-    marginBottom: 14,
-  },
-  cardHeading: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  cardTitle: { fontSize: 16, color: colors.ink },
-  cardBody: { fontSize: 15, color: colors.connectionCardText, lineHeight: 22 },
-});

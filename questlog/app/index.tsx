@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Board } from '@/components/board';
@@ -16,15 +16,18 @@ import { Stats } from '@/components/stats';
 import { Toast } from '@/components/toast';
 import { Toolbar } from '@/components/toolbar';
 import { Topbar } from '@/components/topbar';
-import { colors, pixelFont, serifFont } from '@/constants/theme';
 import { roots } from '@/lib/model';
 import { useQuestlog } from '@/lib/questlog-store';
+import { useTheme } from '@/lib/theme-store';
 import type { QuestKind } from '@/lib/types';
+import { createStyles } from '@/components/questlog-screen.styles';
 
 type DialogKind = 'quest' | 'journal' | 'connection' | 'share' | 'settings' | 'delete' | null;
 
 export default function QuestlogScreen() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     filter,
     currentJournal,
@@ -163,10 +166,10 @@ export default function QuestlogScreen() {
           <View style={{ flex: 1 }} />
           {mode === 'demo' && journal?.shared && (
             <View style={styles.membersRow}>
-              <View style={[styles.memberAvatar, { backgroundColor: '#dfd7c0' }]}>
+              <View style={[styles.memberAvatar, { backgroundColor: colors.memberAvatarBg1 }]}>
                 <Text style={styles.memberAvatarText}>Y</Text>
               </View>
-              <View style={[styles.memberAvatar, { backgroundColor: '#b7c7b1', marginLeft: -8 }]}>
+              <View style={[styles.memberAvatar, { backgroundColor: colors.memberAvatarBg2, marginLeft: -8 }]}>
                 <Text style={styles.memberAvatarText}>A</Text>
               </View>
               <Text style={styles.sharedLabel}>Demo party</Text>
@@ -175,7 +178,7 @@ export default function QuestlogScreen() {
           {mode === 'demo' && <View style={styles.demoBadge}><Text style={styles.demoBadgeText}>DEMO</Text></View>}
           {journal && (
             <Pressable style={styles.shareButton} onPress={() => setDialog('share')}>
-              <Icon name="users" size={13} color="#76846a" />
+              <Icon name="users" size={13} color={colors.shareButtonText} />
               <Text style={styles.shareButtonText}>Sharing</Text>
             </Pressable>
           )}
@@ -232,54 +235,3 @@ export default function QuestlogScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
-  content: { flex: 1 },
-  contentInner: { padding: 20, paddingBottom: 50, gap: 20 },
-  intro: { gap: 10 },
-  eyebrow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  eyebrowText: { fontSize: 12, fontWeight: '700', letterSpacing: 1.5, color: colors.gold },
-  heading: { fontFamily: pixelFont, fontSize: 18, lineHeight: 27, color: colors.intro, marginTop: 8 },
-  subheading: { fontSize: 14, color: colors.introBody },
-  primaryButton: {
-    backgroundColor: colors.primaryBg,
-    paddingVertical: 11,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    alignSelf: 'flex-start',
-    marginTop: 6,
-  },
-  primaryButtonText: { color: colors.primaryText, fontSize: 14 },
-  disabled: { opacity: 0.5 },
-  notice: {
-    backgroundColor: colors.noticeBg,
-    borderWidth: 1,
-    borderColor: colors.noticeBorder,
-    borderRadius: 5,
-    padding: 11,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  noticeText: { flex: 1, fontSize: 14, color: colors.noticeText, lineHeight: 20 },
-  noticeAction: { fontSize: 14, color: colors.noticeText, textDecorationLine: 'underline' },
-  boardHeading: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-  boardTitle: { fontFamily: serifFont, fontSize: 20, color: '#40503b', flexShrink: 1 },
-  boardCount: { fontSize: 13, color: '#969d8e' },
-  membersRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  memberAvatar: { width: 23, height: 23, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  memberAvatarText: { fontFamily: serifFont, fontSize: 12, color: colors.ink },
-  sharedLabel: { fontSize: 12, color: '#8a9381', marginLeft: 4 },
-  demoBadge: { backgroundColor: colors.localBadgeBg, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 4 },
-  demoBadgeText: { fontSize: 11, color: colors.localBadgeText },
-  shareButton: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  shareButtonText: { fontSize: 13, color: '#76846a' },
-  footnote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 10 },
-  footnoteLine: { width: 35, height: 1, backgroundColor: colors.footnoteLine },
-  footnoteText: { fontFamily: serifFont, fontStyle: 'italic', fontSize: 15, color: colors.footnoteText },
-});

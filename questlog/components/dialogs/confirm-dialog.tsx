@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
 
+import { useTheme } from '@/lib/theme-store';
 import { ModalShell } from '../modal-shell';
+import { createStyles } from './confirm-dialog.styles';
 import { DialogActions, ErrorText, PrimaryButton, SecondaryButton } from './form-parts';
 
 interface Props {
@@ -17,10 +19,12 @@ interface Props {
 }
 
 export function ConfirmDialog({ visible, title, message, confirmLabel, cancelLabel = 'Cancel', error, busy, onConfirm, onCancel }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <ModalShell visible={visible} title={title} onClose={onCancel}>
       <View>
-        <Text style={{ fontSize: 16, lineHeight: 23, color: '#7b8771' }}>{message}</Text>
+        <Text style={styles.message}>{message}</Text>
         <ErrorText>{error}</ErrorText>
         <DialogActions>
           <SecondaryButton title={cancelLabel} onPress={onCancel} />

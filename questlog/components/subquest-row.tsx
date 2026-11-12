@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import { Pressable, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { colors } from '@/constants/theme';
 import { useQuestlog } from '@/lib/questlog-store';
+import { useTheme } from '@/lib/theme-store';
 import type { Quest } from '@/lib/types';
 import { AnimatedCheck } from './animated-check';
 import { FadeText } from './fade-text';
 import { Icon } from './icon';
+import { createStyles } from './subquest-row.styles';
 
 interface Props {
   quest: Quest;
@@ -21,6 +22,8 @@ interface Props {
 
 export function SubquestRow({ quest, all, depth = 0, onEdit, onAddSub, onToggle, seen }: Props) {
   const { editable } = useQuestlog();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   // The row gently fades back once its subquest is complete. These hooks run
   // on every render (even for the already-visited guard below) to satisfy
@@ -70,13 +73,3 @@ export function SubquestRow({ quest, all, depth = 0, onEdit, onAddSub, onToggle,
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, paddingVertical: 9, minHeight: 33 },
-  connector: { position: 'absolute', top: 0, height: 22, width: 8, borderLeftWidth: 1, borderBottomWidth: 1, borderColor: colors.line, borderBottomLeftRadius: 3 },
-  checkMargin: { marginTop: 2 },
-  titleWrap: { flex: 1 },
-  title: { fontSize: 15, lineHeight: 21, color: colors.subTitle },
-  titleDoneDecoration: { textDecorationLine: 'line-through', textDecorationColor: colors.completedText },
-  addButton: { padding: 2 },
-});

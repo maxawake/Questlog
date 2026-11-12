@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Pressable, StyleProp, ViewStyle } from 'react-native';
 import Animated, { Easing, interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { colors } from '@/constants/theme';
+import { useTheme } from '@/lib/theme-store';
 import { Icon } from './icon';
 
 const DURATION = 550;
@@ -20,6 +20,7 @@ interface Props {
 
 /** A checkbox that slowly fades between its unchecked and checked look. */
 export function AnimatedCheck({ checked, onPress, disabled, size = 20, iconSize = 12, borderRadius, accessibilityLabel, style }: Props) {
+  const { colors } = useTheme();
   const progress = useSharedValue(checked ? 1 : 0);
 
   useEffect(() => {

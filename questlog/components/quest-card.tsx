@@ -1,16 +1,17 @@
-import React, { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { colors, serifFont } from '@/constants/theme';
 import { dueLabel, isOverdue } from '@/lib/format';
 import { progress } from '@/lib/model';
 import { useQuestlog } from '@/lib/questlog-store';
+import { useTheme } from '@/lib/theme-store';
 import type { Quest } from '@/lib/types';
 import { AnimatedCheck } from './animated-check';
 import { AnimatedProgressBar } from './animated-progress-bar';
 import { FadeText } from './fade-text';
 import { Icon } from './icon';
+import { createStyles } from './quest-card.styles';
 import { SubquestRow } from './subquest-row';
 
 interface Props {
@@ -23,6 +24,8 @@ interface Props {
 
 export function QuestCard({ quest, all, onEdit, onAddSub, onToggle }: Props) {
   const { collapsed, toggleCollapsed, editable } = useQuestlog();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const p = progress(all, quest.id);
   const isCollapsed = collapsed.has(quest.id);
   const children = all.filter((q) => q.parent === quest.id);
@@ -123,42 +126,3 @@ export function QuestCard({ quest, all, onEdit, onAddSub, onToggle }: Props) {
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: { backgroundColor: colors.paper, borderWidth: 1, borderColor: colors.cardBorder, borderRadius: 8, overflow: 'hidden' },
-  top: { padding: 20 },
-  kindRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 11 },
-  kindLabel: { fontSize: 12, fontWeight: '600', letterSpacing: 1 },
-  readOnly: { fontSize: 12, color: colors.readOnly, marginLeft: 4 },
-  menuRow: { flexDirection: 'row', gap: 10, marginLeft: 'auto', alignItems: 'center' },
-  titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 11 },
-  checkMargin: { marginTop: 4 },
-  titleWrap: { flex: 1 },
-  title: { fontFamily: serifFont, fontSize: 24, lineHeight: 30, color: colors.questTitle },
-  titleDoneDecoration: { textDecorationLine: 'line-through', textDecorationColor: colors.completedText },
-  description: { fontSize: 14, color: colors.questDescription, lineHeight: 20, marginTop: 8, marginLeft: 31 },
-  subquests: { paddingHorizontal: 21 },
-  addSubquest: { flexDirection: 'row', alignItems: 'center', gap: 7, marginHorizontal: 21, marginBottom: 10, paddingVertical: 6 },
-  addSubquestText: { fontSize: 14, color: colors.addSubquest },
-  progressWrap: { paddingHorizontal: 21, paddingBottom: 16 },
-  progressTrack: { height: 3, backgroundColor: '#edf0e6', borderRadius: 20, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: '#bdc6a7', borderRadius: 20 },
-  footer: {
-    backgroundColor: colors.cardFooterBg,
-    borderTopWidth: 1,
-    borderTopColor: colors.cardFooterBorder,
-    paddingHorizontal: 21,
-    paddingVertical: 11,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flexWrap: 'wrap',
-  },
-  footerSide: { backgroundColor: colors.sideFooterBg },
-  footerLeft: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  footerText: { fontSize: 13, color: colors.cardFooterText },
-  overdueText: { color: colors.overdue },
-  miniTag: { borderWidth: 1, borderColor: colors.miniTagBorder, borderRadius: 3, paddingHorizontal: 5, paddingVertical: 3 },
-  miniTagText: { fontSize: 12, color: colors.cardFooterText },
-  dueRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginLeft: 'auto' },
-});

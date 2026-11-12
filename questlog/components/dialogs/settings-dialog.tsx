@@ -1,14 +1,23 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Pressable, Text, View } from 'react-native';
 
-import { colors } from '@/constants/theme';
 import { useQuestlog } from '@/lib/questlog-store';
+import { useTheme, type ThemeMode } from '@/lib/theme-store';
 import { Icon } from '../icon';
-import { HelpLine, SecondaryButton } from './form-parts';
 import { ModalShell } from '../modal-shell';
+import { createStyles } from './settings-dialog.styles';
+import { HelpLine, SecondaryButton } from './form-parts';
+
+const THEME_OPTIONS: { key: ThemeMode; title: string }[] = [
+  { key: 'light', title: 'Light' },
+  { key: 'dark', title: 'Dark' },
+  { key: 'system', title: 'System' },
+];
 
 export function SettingsDialog({ visible, onClose, onConnect }: { visible: boolean; onClose: () => void; onConnect: () => void }) {
   const { mode, exportBackup } = useQuestlog();
+  const { colors, mode: themeMode, setMode: setThemeMode } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <ModalShell visible={visible} title="Make yourself at home" onClose={onClose}>
@@ -24,6 +33,17 @@ export function SettingsDialog({ visible, onClose, onConnect }: { visible: boole
             : 'Your Nextcloud server stores your quests. This app checks for updates every 20 seconds. Sessions last eight hours; signing out clears the session.'}
         </Text>
       </View>
+      <Text style={styles.cardTitle}>Appearance</Text>
+      <View style={styles.themeRow}>
+        {THEME_OPTIONS.map((option) => (
+          <Pressable
+            key={option.key}
+            onPress={() => setThemeMode(option.key)}
+            style={[styles.themeOption, themeMode === option.key && styles.themeOptionActive]}>
+            <Text style={styles.themeOptionText}>{option.title}</Text>
+          </Pressable>
+        ))}
+      </View>
       <View style={styles.buttonStack}>
         <SecondaryButton title="Connection options" icon="cloud" onPress={onConnect} style={styles.wideButton} />
         <SecondaryButton title="Export a JSON backup" icon="download" onPress={exportBackup} style={styles.wideButton} />
@@ -35,20 +55,3 @@ export function SettingsDialog({ visible, onClose, onConnect }: { visible: boole
     </ModalShell>
   );
 }
-
-const styles = StyleSheet.create({
-  intro: { fontSize: 16, lineHeight: 23, color: colors.dialogBodyText },
-  card: {
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.connectionCardBorder,
-    borderRadius: 7,
-    backgroundColor: colors.connectionCardBg,
-    marginVertical: 14,
-  },
-  cardHeading: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  cardTitle: { fontSize: 15, color: colors.ink },
-  cardBody: { fontSize: 14, color: colors.connectionCardText, lineHeight: 21 },
-  buttonStack: { gap: 10 },
-  wideButton: { justifyContent: 'center' },
-});

@@ -1,15 +1,16 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
-import { colors } from '@/constants/theme';
 import { descendants } from '@/lib/model';
 import { useQuestlog } from '@/lib/questlog-store';
+import { useTheme } from '@/lib/theme-store';
 import type { QuestKind } from '@/lib/types';
 import { Icon } from '../icon';
-import { DangerButton, DialogActions, ErrorText, FieldLabel, HelpLine, PrimaryButton, SecondaryButton, TextAreaField, TextField } from './form-parts';
 import { ModalShell } from '../modal-shell';
+import { DangerButton, DialogActions, ErrorText, FieldLabel, HelpLine, PrimaryButton, SecondaryButton, TextAreaField, TextField } from './form-parts';
+import { createStyles } from './quest-dialog.styles';
 
 interface Props {
   visible: boolean;
@@ -22,6 +23,8 @@ interface Props {
 
 export function QuestDialog({ visible, questId, parentId, defaultKind, onClose, onRequestDelete }: Props) {
   const { questsHere, currentJournal, editable, createQuest, updateQuest } = useQuestlog();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const all = questsHere();
   const existing = useMemo(() => all.find((q) => q.id === questId) || null, [all, questId]);
   const parentQuest = useMemo(() => all.find((q) => q.id === parentId) || null, [all, parentId]);
@@ -132,7 +135,7 @@ export function QuestDialog({ visible, questId, parentId, defaultKind, onClose, 
 
       <FieldLabel>Part of a bigger quest</FieldLabel>
       <View style={styles.pickerWrap}>
-        <Picker selectedValue={parent} onValueChange={(value) => setParent(String(value))} enabled={canEdit}>
+        <Picker selectedValue={parent} onValueChange={(value) => setParent(String(value))} enabled={canEdit} style={styles.picker} dropdownIconColor={colors.inputText}>
           <Picker.Item label="An adventure of its own" value="" />
           {options.map((q) => (
             <Picker.Item key={q.id} label={q.title} value={q.id} />
@@ -183,34 +186,3 @@ export function QuestDialog({ visible, questId, parentId, defaultKind, onClose, 
     </ModalShell>
   );
 }
-
-const styles = StyleSheet.create({
-  intro: { fontSize: 16, lineHeight: 23, color: colors.dialogBodyText },
-  pillRow: { flexDirection: 'row', gap: 10 },
-  pill: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.pillBorder,
-    borderRadius: 5,
-    backgroundColor: colors.pillBg,
-  },
-  pillChecked: { borderColor: colors.pillBorderChecked, backgroundColor: colors.pillBgChecked },
-  pillText: { color: colors.pillText, fontSize: 15 },
-  pickerWrap: { borderWidth: 1, borderColor: colors.inputBorder, borderRadius: 5, backgroundColor: colors.inputBg },
-  dateField: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-    borderRadius: 5,
-    backgroundColor: colors.inputBg,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  dateText: { flex: 1, color: colors.inputText, fontSize: 16 },
-});

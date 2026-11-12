@@ -1,14 +1,17 @@
-import React from 'react';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Linking, Text, View } from 'react-native';
 
-import { colors } from '@/constants/theme';
 import { useQuestlog } from '@/lib/questlog-store';
+import { useTheme } from '@/lib/theme-store';
 import { Icon } from '../icon';
-import { PrimaryButton } from './form-parts';
 import { ModalShell } from '../modal-shell';
+import { PrimaryButton } from './form-parts';
+import { createStyles } from './share-dialog.styles';
 
 export function ShareDialog({ visible, onClose, onConnect }: { visible: boolean; onClose: () => void; onConnect: () => void }) {
   const { mode, currentJournal, config } = useQuestlog();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const title = currentJournal()?.title || 'Your journal';
 
   return (
@@ -46,28 +49,3 @@ export function ShareDialog({ visible, onClose, onConnect }: { visible: boolean;
     </ModalShell>
   );
 }
-
-const styles = StyleSheet.create({
-  illustration: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, marginBottom: 18 },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#d9dfc7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { fontFamily: 'serif', fontSize: 18, color: colors.ink },
-  body: { fontSize: 16, lineHeight: 23, color: colors.dialogBodyText, marginBottom: 14 },
-  card: {
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.connectionCardBorder,
-    borderRadius: 7,
-    backgroundColor: colors.connectionCardBg,
-    marginBottom: 16,
-  },
-  cardHeading: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  cardTitle: { fontSize: 15, color: colors.ink },
-  cardBody: { fontSize: 14, color: colors.connectionCardText, lineHeight: 21 },
-});

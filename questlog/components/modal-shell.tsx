@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { colors, pixelFont } from '@/constants/theme';
+import { useTheme } from '@/lib/theme-store';
+import { createStyles } from './modal-shell.styles';
 import { Icon } from './icon';
 
 interface Props {
@@ -14,6 +15,8 @@ interface Props {
 
 /** A centered card dialog, styled after questlog/dist/styles.css's `<dialog>`. */
 export function ModalShell({ visible, title, onClose, children }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
       <View style={styles.backdrop}>
@@ -37,27 +40,3 @@ export function ModalShell({ visible, title, onClose, children }: Props) {
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: colors.dialogBackdrop, justifyContent: 'center', padding: 18 },
-  cardWrap: { maxHeight: '90%' },
-  card: {
-    backgroundColor: colors.dialogBg,
-    borderRadius: 13,
-    borderWidth: 1,
-    borderColor: colors.dialogBorder,
-    maxHeight: '100%',
-    overflow: 'hidden',
-  },
-  head: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 22,
-    paddingTop: 22,
-    paddingBottom: 6,
-  },
-  title: { fontSize: 15, lineHeight: 22, color: colors.dialogText, flexShrink: 1, fontFamily: pixelFont, paddingRight: 10 },
-  body: { paddingHorizontal: 22 },
-  bodyContent: { paddingBottom: 23, paddingTop: 11 },
-});

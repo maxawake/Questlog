@@ -1,10 +1,11 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Pressable, Text, View } from 'react-native';
 
-import { colors, pixelFont } from '@/constants/theme';
 import { descendants, roots } from '@/lib/model';
 import { useQuestlog } from '@/lib/questlog-store';
+import { useTheme } from '@/lib/theme-store';
 import type { Quest, QuestKind } from '@/lib/types';
+import { createStyles } from './board.styles';
 import { Icon } from './icon';
 import { QuestCard } from './quest-card';
 
@@ -17,6 +18,8 @@ interface Props {
 
 export function Board({ onEdit, onAddSub, onToggle, onNewQuest }: Props) {
   const { questsHere, filter, search, currentJournal, editable } = useQuestlog();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const all = questsHere();
   const query = search.trim().toLowerCase();
   let visible = roots(all).filter((q) => (filter === 'completed' ? q.completed : !q.completed));
@@ -79,36 +82,3 @@ export function Board({ onEdit, onAddSub, onToggle, onNewQuest }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  grid: { gap: 24 },
-  column: { gap: 16 },
-  columnHeading: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  columnHeadingText: { fontFamily: pixelFont, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: '#929887' },
-  columnLine: { flex: 1, height: 1, backgroundColor: '#dedfd3', marginLeft: 6 },
-  newCard: {
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: colors.newCardBorder,
-    borderRadius: 7,
-    minHeight: 49,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 8,
-  },
-  newCardText: { fontSize: 14, color: colors.newCardText },
-  empty: {
-    padding: 32,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: colors.emptyBorder,
-    borderRadius: 8,
-    gap: 6,
-  },
-  emptyTitle: { fontFamily: pixelFont, fontSize: 14, lineHeight: 22, color: colors.emptyText, marginTop: 10, textAlign: 'center' },
-  emptyBody: { fontSize: 15, lineHeight: 22, color: colors.emptyText, textAlign: 'center' },
-  emptyButton: { backgroundColor: colors.primaryBg, paddingVertical: 11, paddingHorizontal: 16, borderRadius: 5, marginTop: 10 },
-  emptyButtonText: { color: colors.primaryText, fontSize: 15 },
-});
