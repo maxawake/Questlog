@@ -1,37 +1,83 @@
-Questlog
+# Questlog (Expo app)
 
-A self-hosted quest journal for everyday life. Main quests hold the bigger goals, side quests hold the little adventures, and nested subquests stay visible in the overview. The responsive web app works on desktop and mobile, with a web app manifest for installation on supported browsers.
+The Android/iOS client for Questlog, a self-hosted quest journal for everyday
+life. It is built with [Expo](https://expo.dev) and [expo-router](https://docs.expo.dev/router/introduction)
+and ports every feature of the web app in [`questlog/dist`](../questlog/dist)
+to React Native: main quests, side quests, nested subquests with progress
+tracking, journals, search and filters, a local demo mode, and a connected
+mode that talks to the Python/FastAPI CalDAV adapter in [`questlog/`](../questlog)
+for Nextcloud-backed sync and sharing.
 
-This version uses Nextcloud for synchronization and shared lists. The downloadable app contains the complete frontend and a Python/FastAPI CalDAV adapter. The hosted preview runs the same frontend with sample data saved only in the current browser. Its sample party members are illustrative. No preview data is shared or uploaded to Nextcloud automatically.
+## Features
 
-Run it with Docker
+- **Local demo mode.** Sample quests and journals persist on-device
+  (`AsyncStorage`) so the app is fully usable offline, with no server.
+- **Main quests, side quests, and nested subquests.** Subquests can nest
+  arbitrarily deep; a parent's progress bar reflects every descendant.
+- **Journals.** Create new journals and switch between them from the
+  navigation drawer.
+- **Filters and search.** Filter by all/main/side/completed quests and search
+  quest titles and descriptions.
+- **Connect to your Questlog server.** Enter your self-hosted server's
+  address, then sign in with your Nextcloud username and an app password to
+  sync and share journals, exactly like the web app.
+- **Offline awareness.** The app detects connectivity loss and pauses writes
+  while still showing the last loaded journal.
+- **Sharing info and settings.** Mirrors the web app's sharing guidance and
+  settings screen, including exporting a JSON backup of your journal (shared
+  via the system share sheet).
 
-1. Extract the archive and open the `questlog` directory in a terminal. Install Docker with Compose if it is not already available.
-2. Copy `.env.example` to `.env`. Set `NEXTCLOUD_URL` to the root of your Nextcloud installation, for example `https://cloud.example.com` or `https://example.com/nextcloud`. Enable Nextcloud Calendar or Tasks. Questlog discovers calendar paths automatically.
-3. Start the app with `docker compose up -d --build` and open `http://localhost:8000`. The default port is bound to localhost. Without a configured Nextcloud URL you can still explore the local demo.
-4. For access from phones and other people, serve Questlog through your existing HTTPS reverse proxy or private VPN. With an HTTPS reverse proxy, set `PUBLIC_ORIGIN` to the exact public origin, such as `https://quests.example.com`, and `COOKIE_SECURE=true`. Route requests to port 8000, then recreate the container with `docker compose up -d`. Host the app at the root of its own origin, not under a URL subpath. A private network or public reverse proxy must also make the Nextcloud server reachable from the Questlog container. No credentials belong in the frontend or source repository.
-5. Select “Connect your world” and sign in with your own Nextcloud username and an app password generated under Nextcloud Settings → Security. Use the exact username rather than a display name. Each device and each person signs in independently.
+## Connecting to a server
 
-Share a journal
+Unlike the bundled web frontend, this app is not served by `server.py` from
+the same origin, so it asks for your server's address explicitly. Open
+**Connect your world** from the sidebar or Settings, enter your server's URL
+(for example `https://questlog.example.com`), then sign in with your
+Nextcloud username and an app password generated under Nextcloud
+**Settings → Security**. See the [root README](../questlog/README.md) for how
+to deploy that server.
 
-Create a journal in Questlog, then select Sharing → Manage sharing in Nextcloud. In Nextcloud Calendar, find the matching calendar and share it with an existing Nextcloud user or group. Grant edit access to collaborators, or read-only access for viewers. The other person signs in to your Questlog deployment with their own Nextcloud account; the shared journal is discovered automatically. There are no separate Questlog invitations or accounts, and you should never give another person your app password. Journal owners manage access in Nextcloud.
+## Get started
 
-Nextcloud is the source of truth. Each journal is a CalDAV calendar collection and each quest is a VTODO item. `RELATED-TO;RELTYPE=PARENT` links a subquest to its parent, including deeper nesting. `X-QUESTLOG-KIND` stores main versus side quest; ordinary clients can display and complete these tasks but may not display or preserve that extra classification. Subquests inherit their parent's type when saved in Questlog. A parent's checkbox is independent of its subquest checkboxes; the progress indicator counts all descendants.
+1. Install dependencies
 
-Questlog refreshes from Nextcloud every 20 seconds, on return to the app, and after saves. It pauses periodic refresh while a dialog is open or the search field has focus. Saves use ETags and `If-Match` so another person's edits are not silently overwritten. If a conflict is reported, close the editor, refresh, and reopen the quest to review the latest version. Removing a quest with children is blocked until its children are moved or removed. Unknown iCalendar fields and alarms are preserved during edits. Recurring tasks are shown read-only and should be edited in Nextcloud Tasks.
+   ```bash
+   npm install
+   ```
 
-The browser only receives an opaque, HttpOnly, SameSite session cookie and a CSRF token. Nextcloud app passwords remain in the Python process memory for the authenticated session and are never written to browser storage or disk. Sessions expire after eight hours or when the app restarts. The bundled container deliberately runs one worker; multi-worker deployments require a shared session store. The server address is fixed by deployment configuration, rather than accepting arbitrary URLs from visitors. TLS verification is enabled for connections to Nextcloud.
+2. Start the app
 
-The demo works offline and persists in local browser storage. For connected journals, this version supports reading the currently loaded view during a connection interruption; edits wait until connectivity returns. It does not queue offline writes or persist live account data across an offline reload. Nextcloud data is separate from demo data. An exported JSON snapshot is a readable archive; there is no built-in JSON import yet. Back up your Nextcloud data for recovery.
+   ```bash
+   npx expo start
+   ```
 
-Home Assistant is not a second synchronization backend in this version. Its built-in to-do model does not expose parent-child quest relationships or the same calendar-sharing model, so Nextcloud is used for this application's synchronization. A future Home Assistant adapter could react to quest changes for household automations.
+In the output, you'll find options to open the app in a
 
-Development and verification
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-For a Python development setup, create a virtual environment, install `requirements.txt`, set the environment variables from `.env.example`, and run `uvicorn server:app --reload --port 8000`. `COOKIE_SECURE=false` is necessary for ordinary local HTTP development. `.env` is loaded by Docker Compose; when running Uvicorn directly, set the variables in your shell or process environment.
+Run `npx expo export --platform android` to produce a release JS bundle, or
+use [EAS Build](https://docs.expo.dev/build/introduction/) for an installable
+`.apk`/`.aab`.
 
-Install pytest and run `python -m pytest tests/test_sync.py -q`. Run `node --test tests/model.test.mjs` for the client data model. The test suite exercises nested relationships, shared reads and edits, read-only permissions, stale and racing writes, round-trip preservation, parent cycles, session isolation, CSRF, recurring task protection, and logout against a simulated CalDAV server. These are not live Nextcloud end-to-end tests. The adapter still needs verification against your Nextcloud instance and its configuration.
+## Project layout
 
-The frontend uses standard browser APIs and has no JavaScript dependencies or build step. Serve `dist` directly for a demo, or run the Python server to enable synchronization. The root `server.py` serves the frontend and API from the same origin, avoiding browser CalDAV CORS problems. The included `compose.yaml` and `Dockerfile` are for your own server; they are independent of the hosted preview.
+- `app/` – expo-router screens (`_layout.tsx` wraps the app in the Questlog
+  provider; `index.tsx` is the single main screen).
+- `components/` – UI: the quest board, cards, sidebar drawer, top bar, and the
+  dialogs (`components/dialogs/`) used for creating/editing quests and
+  journals, connecting to a server, sharing, and settings.
+- `lib/model.ts` – the quest tree helpers (`descendants`, `progress`, `roots`)
+  and demo data, ported 1:1 from `questlog/dist/model.js`.
+- `lib/api.ts` – a typed client for the server's `/api/*` endpoints.
+- `lib/questlog-store.tsx` – the app's state and actions (data, filters,
+  mutations, sync), ported from `questlog/dist/app.js`.
+- `constants/theme.ts` – the single color palette ported from
+  `questlog/dist/styles.css` (the product has no dark mode).
 
-Protocol references: https://github.com/nextcloud/tasks, https://docs.nextcloud.com/server/stable/user_manual/en/groupware/calendar.html, https://www.rfc-editor.org/rfc/rfc4791, https://www.rfc-editor.org/rfc/rfc5545.
+## Learn more
+
+- [Expo documentation](https://docs.expo.dev/)
+- [Questlog server and protocol docs](../questlog/README.md)
