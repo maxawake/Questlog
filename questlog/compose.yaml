@@ -1,0 +1,10 @@
+services:
+  questlog:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      NEXTCLOUD_URL: ${NEXTCLOUD_URL}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:8000}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
